@@ -28,22 +28,45 @@ export async function GET() {
     const results: MemberData[] = await Promise.all(
       MEMBERS.map(async (member) => {
         try {
+          // 1단계: members/이름/ 폴더 목록 (brief_날짜_시간 폴더들)
           const res = await fetch(
             `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/members/${encodeURIComponent(member)}`,
             { headers }
           )
           if (!res.ok) return { name: member, briefs: [] }
 
-          const files = await res.json() as Array<{ name: string; path: string; html_url: string }>
+          const folders = await res.json() as Array<{ name: string; path: string; type: string }>
 
-          const briefs: BriefFile[] = files
-            .filter(f => f.name.endsWith('.md'))
-            .map(f => ({
-              name: f.name,
-              path: f.path,
-              url:  f.html_url,
-              date: f.name.replace('brief_', '').replace('.md', ''),
-            }))
+          // 2단계: 각 brief_* 폴더 안의 _brief.md 수집
+          const briefFolders = folders.filter(f => f.type === 'dir' && f.name.startsWith('brief_'))
+
+          const briefs: BriefFile[] = (
+            await Promise.all(
+              briefFolders.map(async (folder) => {
+                try {
+                  const folderRes = await fetch(
+                    `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${encodeURIComponent(folder.path)}`,
+                    { headers }
+                  )
+                  if (!folderRes.ok) return null
+
+                  const files = await folderRes.json() as Array<{ name: string; path: string; html_url: string }>
+                  const briefFile = files.find(f => f.name === '_brief.md')
+                  if (!briefFile) return null
+
+                  return {
+                    name: folder.name,
+                    path: briefFile.path,
+                    url:  briefFile.html_url,
+                    date: folder.name.replace('brief_', ''),
+                  }
+                } catch {
+                  return null
+                }
+              })
+            )
+          )
+            .filter((b): b is BriefFile => b !== null)
             .sort((a, b) => b.date.localeCompare(a.date))
 
           return { name: member, briefs }
