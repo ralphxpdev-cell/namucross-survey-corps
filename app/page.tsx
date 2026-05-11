@@ -18,35 +18,13 @@ export default function OnboardingPage() {
   const [selected, setSelected] = useState<string | null>(null)
   const [apiKey, setApiKey] = useState('')
   const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
 
-  const handleStart = async () => {
+  const handleStart = () => {
     if (!selected || !apiKey.trim()) return
-    if (!apiKey.startsWith('AIza')) {
-      setError('Gemini API 키는 AIza로 시작해야 합니다.')
+    if (!apiKey.trim().startsWith('AIza') || apiKey.trim().length < 30) {
+      setError('Gemini API 키 형식이 올바르지 않습니다. (AIza로 시작)')
       return
     }
-
-    setLoading(true)
-    setError('')
-
-    // 간단한 API 키 검증
-    try {
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey.trim()}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: 'hi' }] }] }),
-        }
-      )
-      if (!res.ok) throw new Error()
-    } catch {
-      setError('API 키를 확인해주세요. 키가 유효하지 않습니다.')
-      setLoading(false)
-      return
-    }
-
     localStorage.setItem('sc_member', selected)
     localStorage.setItem('sc_api_key', apiKey.trim())
     router.push('/workspace')
@@ -133,7 +111,7 @@ export default function OnboardingPage() {
               : 'bg-zinc-900 text-zinc-600 cursor-not-allowed border border-zinc-800'
           }`}
         >
-          {loading ? '확인 중...' : selected ? `${selected}님으로 시작하기` : '멤버를 선택해주세요'}
+          {selected ? `${selected}님으로 시작하기` : '멤버를 선택해주세요'}
         </button>
 
         {/* 사령관 링크 */}
