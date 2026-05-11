@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-const MEMBERS = ['이태섭', '안성은', '백은총', '김승리', '구광현']
+const MEMBERS = ['이태섭', '안성은', '백은총', '김승리', '구광현', '전성은']
 
 const COLORS = [
   'bg-blue-500/20 text-blue-300 border-blue-500/30',

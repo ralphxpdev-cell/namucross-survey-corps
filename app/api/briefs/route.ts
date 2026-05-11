@@ -4,7 +4,7 @@ const GITHUB_TOKEN = process.env.GITHUB_TOKEN!
 const GITHUB_OWNER = process.env.GITHUB_OWNER!
 const GITHUB_REPO  = process.env.GITHUB_REPO!
 
-const MEMBERS = ['이태섭', '안성은', '백은총', '김승리', '구광현']
+const MEMBERS = ['이태섭', '안성은', '백은총', '김승리', '구광현', '전성은']
 
 interface BriefFile {
   name: string
