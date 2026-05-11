@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Survey Corps — 유저 시나리오</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { font-family: 'Pretendard', sans-serif; }
+  .arrow-down::after {
+    content: '';
+    display: block;
+    width: 2px;
+    height: 32px;
+    background: #3f3f46;
+    margin: 0 auto;
+  }
+  .arrow-right::after {
+    content: '→';
+    color: #52525b;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+  }
+</style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen p-10">
+
+  <header class="mb-16">
+    <div class="flex items-center gap-3 mb-2">
+      <span class="text-xs tracking-widest text-zinc-600 uppercase">namucross survey corps</span>
+      <span class="text-zinc-800">|</span>
+      <span class="text-xs text-zinc-600">유저 시나리오 플로우</span>
+    </div>
+    <h1 class="text-2xl font-bold text-zinc-100">어떻게 쓰이는가</h1>
+  </header>
+
+  <!-- 두 유저 타입 -->
+  <div class="grid grid-cols-2 gap-16 max-w-5xl">
+
+    <!-- 멤버 시나리오 -->
+    <div>
+      <div class="flex items-center gap-3 mb-8">
+        <div class="w-8 h-8 rounded-full bg-blue-500/20 border border-blue-500/40 flex items-center justify-center">
+          <span class="text-blue-400 text-xs font-bold">멤</span>
+        </div>
+        <div>
+          <p class="text-sm font-semibold text-zinc-200">조사병단 멤버</p>
+          <p class="text-xs text-zinc-600">이태섭, 안성은, 백은총, 김승리, 구광현</p>
+        </div>
+      </div>
+
+      <div class="space-y-1">
+
+        <!-- STEP 1 -->
+        <div class="arrow-down">
+          <div class="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-[10px] font-mono text-zinc-600 bg-zinc-800 px-2 py-0.5 rounded">01</span>
+              <span class="text-xs text-zinc-400 font-medium">앱 접속</span>
+            </div>
+            <p class="text-sm text-zinc-300">링크 클릭 (Vercel 배포)</p>
+            <p class="text-xs text-zinc-600 mt-1">survey-corps.vercel.app</p>
+          </div>
+        </div>
+
+        <!-- STEP 2 -->
+        <div class="arrow-down">
+          <div class="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-[10px] font-mono text-zinc-600 bg-zinc-800 px-2 py-0.5 rounded">02</span>
+              <span class="text-xs text-zinc-400 font-medium">셋업</span>
+            </div>
+            <p class="text-sm text-zinc-300">이름 선택</p>
+            <div class="flex gap-2 mt-2 flex-wrap">
+              <span class="text-[11px] bg-zinc-800 text-zinc-400 px-2 py-1 rounded">이태섭</span>
+              <span class="text-[11px] bg-zinc-800 text-zinc-400 px-2 py-1 rounded">안성은</span>
+              <span class="text-[11px] bg-zinc-800 text-zinc-400 px-2 py-1 rounded">백은총</span>
+              <span class="text-[11px] bg-blue-500/20 text-blue-400 border border-blue-500/30 px-2 py-1 rounded">+ 2명</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 3 -->
+        <div class="arrow-down">
+          <div class="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-[10px] font-mono text-zinc-600 bg-zinc-800 px-2 py-0.5 rounded">03</span>
+              <span class="text-xs text-zinc-400 font-medium">Gemini API 키 입력</span>
+            </div>
+            <div class="bg-zinc-800 rounded-lg px-3 py-2 font-mono text-xs text-zinc-500">AIza••••••••••••••••</div>
+            <p class="text-[11px] text-zinc-600 mt-2">브라우저에만 저장, 서버 전송 없음</p>
+          </div>
+        </div>
+
+        <!-- STEP 4 -->
+        <div class="arrow-down">
+          <div class="rounded-xl border border-blue-500/30 bg-blue-500/5 p-4">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-[10px] font-mono text-blue-600 bg-blue-500/20 px-2 py-0.5 rounded">04</span>
+              <span class="text-xs text-blue-300 font-medium">AI와 대화 — 기획서 작성</span>
+            </div>
+            <div class="space-y-2">
+              <div class="bg-zinc-900 rounded-lg p-3">
+                <p class="text-[11px] text-zinc-500 mb-1">AI</p>
+                <p class="text-xs text-zinc-300">"뭘 만들고 싶어요? 어떤 아이디어든 말해보세요 😊"</p>
+              </div>
+              <div class="bg-blue-500/10 rounded-lg p-3 ml-4">
+                <p class="text-[11px] text-blue-500 mb-1">나</p>
+                <p class="text-xs text-zinc-300">"구조계산 결과를 자동으로 엑셀로 만들어주는 앱이요"</p>
+              </div>
+              <div class="bg-zinc-900 rounded-lg p-3">
+                <p class="text-[11px] text-zinc-500 mb-1">AI</p>
+                <p class="text-xs text-zinc-300">"좋아요! 주로 어떤 분들이 쓸 것 같아요?"</p>
+              </div>
+              <div class="text-center py-1">
+                <span class="text-[11px] text-zinc-700">... 7가지 질문 대화로 진행 ...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 5 -->
+        <div class="arrow-down">
+          <div class="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-[10px] font-mono text-zinc-600 bg-zinc-800 px-2 py-0.5 rounded">05</span>
+              <span class="text-xs text-zinc-400 font-medium">기획서 자동 생성 (우측 프리뷰)</span>
+            </div>
+            <div class="bg-zinc-800 rounded-lg p-3 font-mono text-[11px] text-zinc-400 space-y-1">
+              <p class="text-emerald-400"># 구조계산 엑셀 자동화 앱</p>
+              <p>타입: 앱/서비스</p>
+              <p>대상: 건축 구조 엔지니어</p>
+              <p>핵심 기능:</p>
+              <p class="pl-2">- 구조계산 입력</p>
+              <p class="pl-2">- 엑셀 자동 출력</p>
+              <p class="pl-2">- 규격 자동 검토</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 6 -->
+        <div>
+          <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-[10px] font-mono text-emerald-600 bg-emerald-500/20 px-2 py-0.5 rounded">06</span>
+              <span class="text-xs text-emerald-300 font-medium">GitHub 제출</span>
+            </div>
+            <p class="text-sm text-zinc-300">"제출하기" 버튼 클릭</p>
+            <div class="mt-2 bg-zinc-900 rounded-lg p-2 font-mono text-[11px] text-zinc-500">
+              members/백은총/brief_20260511.md
+            </div>
+            <p class="text-[11px] text-emerald-600 mt-2">✓ 사령관에게 전달 완료</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 사령관 시나리오 -->
+    <div>
+      <div class="flex items-center gap-3 mb-8">
+        <div class="w-8 h-8 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center">
+          <span class="text-amber-400 text-xs font-bold">사</span>
+        </div>
+        <div>
+          <p class="text-sm font-semibold text-zinc-200">사령관</p>
+          <p class="text-xs text-zinc-600">Claude Max 플랜 보유</p>
+        </div>
+      </div>
+
+      <div class="space-y-1">
+
+        <!-- STEP 1 -->
+        <div class="arrow-down">
+          <div class="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-[10px] font-mono text-zinc-600 bg-zinc-800 px-2 py-0.5 rounded">01</span>
+              <span class="text-xs text-zinc-400 font-medium">대시보드 접속</span>
+            </div>
+            <p class="text-sm text-zinc-300">survey-corps.vercel.app/dashboard</p>
+            <p class="text-xs text-zinc-600 mt-1">패스워드로 진입 보호</p>
+          </div>
+        </div>
+
+        <!-- STEP 2 -->
+        <div class="arrow-down">
+          <div class="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-[10px] font-mono text-amber-600 bg-amber-500/20 px-2 py-0.5 rounded">02</span>
+              <span class="text-xs text-amber-300 font-medium">멤버 현황 한눈에 확인</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div class="bg-zinc-900 rounded-lg p-2.5">
+                <p class="text-xs font-medium text-zinc-300">이태섭</p>
+                <p class="text-[11px] text-zinc-600 mt-0.5">기획서 1개</p>
+                <span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded mt-1 inline-block">제출완료</span>
+              </div>
+              <div class="bg-zinc-900 rounded-lg p-2.5">
+                <p class="text-xs font-medium text-zinc-300">안성은</p>
+                <p class="text-[11px] text-zinc-600 mt-0.5">기획서 0개</p>
+                <span class="text-[10px] bg-zinc-700/50 text-zinc-500 px-1.5 py-0.5 rounded mt-1 inline-block">미제출</span>
+              </div>
+              <div class="bg-zinc-900 rounded-lg p-2.5">
+                <p class="text-xs font-medium text-zinc-300">백은총</p>
+                <p class="text-[11px] text-zinc-600 mt-0.5">기획서 2개</p>
+                <span class="text-[10px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded mt-1 inline-block">빌드대기</span>
+              </div>
+              <div class="bg-zinc-900 rounded-lg p-2.5">
+                <p class="text-xs font-medium text-zinc-300">김승리</p>
+                <p class="text-[11px] text-zinc-600 mt-0.5">기획서 1개</p>
+                <span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded mt-1 inline-block">제출완료</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 3 -->
+        <div class="arrow-down">
+          <div class="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-[10px] font-mono text-zinc-600 bg-zinc-800 px-2 py-0.5 rounded">03</span>
+              <span class="text-xs text-zinc-400 font-medium">기획서 클릭 → 상세 확인</span>
+            </div>
+            <div class="bg-zinc-800 rounded-lg p-3 font-mono text-[11px] text-zinc-400 space-y-1">
+              <p class="text-emerald-400"># 구조계산 엑셀 자동화 앱</p>
+              <p>멤버: 백은총 / 2026.05.11</p>
+              <p>타입: 앱 / 스타일: saas_modern</p>
+              <p class="text-zinc-600">...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 4 -->
+        <div class="arrow-down">
+          <div class="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-[10px] font-mono text-amber-600 bg-amber-500/20 px-2 py-0.5 rounded">04</span>
+              <span class="text-xs text-amber-300 font-medium">Claude Code로 빌드 시작</span>
+            </div>
+            <p class="text-sm text-zinc-300">기획서 그대로 Claude에 붙여넣기</p>
+            <p class="text-xs text-zinc-600 mt-1">→ tomob 파이프라인 투입</p>
+          </div>
+        </div>
+
+        <!-- STEP 5 -->
+        <div>
+          <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-[10px] font-mono text-emerald-600 bg-emerald-500/20 px-2 py-0.5 rounded">05</span>
+              <span class="text-xs text-emerald-300 font-medium">결과물 납품</span>
+            </div>
+            <p class="text-sm text-zinc-300">멤버 GitHub 폴더에 결과물 저장</p>
+            <div class="mt-2 space-y-1">
+              <div class="font-mono text-[11px] text-zinc-500">members/백은총/brief_0511.md</div>
+              <div class="font-mono text-[11px] text-zinc-500">members/백은총/result_0511.html</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 전체 흐름 요약 -->
+  <div class="mt-20 max-w-5xl">
+    <p class="text-xs text-zinc-600 tracking-widest uppercase mb-6">전체 흐름 요약</p>
+    <div class="flex items-center gap-2 flex-wrap">
+      <div class="bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-center">
+        <p class="text-xs text-zinc-500">멤버</p>
+        <p class="text-sm font-medium text-zinc-200 mt-0.5">앱 접속</p>
+      </div>
+      <span class="text-zinc-700 text-lg">→</span>
+      <div class="bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-center">
+        <p class="text-xs text-zinc-500">멤버</p>
+        <p class="text-sm font-medium text-zinc-200 mt-0.5">AI와 대화</p>
+      </div>
+      <span class="text-zinc-700 text-lg">→</span>
+      <div class="bg-blue-500/10 border border-blue-500/30 rounded-lg px-4 py-3 text-center">
+        <p class="text-xs text-blue-600">자동</p>
+        <p class="text-sm font-medium text-blue-300 mt-0.5">기획서 생성</p>
+      </div>
+      <span class="text-zinc-700 text-lg">→</span>
+      <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-lg px-4 py-3 text-center">
+        <p class="text-xs text-emerald-600">자동</p>
+        <p class="text-sm font-medium text-emerald-300 mt-0.5">GitHub 저장</p>
+      </div>
+      <span class="text-zinc-700 text-lg">→</span>
+      <div class="bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-center">
+        <p class="text-xs text-zinc-500">사령관</p>
+        <p class="text-sm font-medium text-zinc-200 mt-0.5">대시보드 확인</p>
+      </div>
+      <span class="text-zinc-700 text-lg">→</span>
+      <div class="bg-amber-500/10 border border-amber-500/30 rounded-lg px-4 py-3 text-center">
+        <p class="text-xs text-amber-600">사령관</p>
+        <p class="text-sm font-medium text-amber-300 mt-0.5">Claude로 빌드</p>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
