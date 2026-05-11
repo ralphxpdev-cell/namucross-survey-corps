@@ -104,9 +104,9 @@ export default function OnboardingPage() {
         {/* 시작 버튼 */}
         <button
           onClick={handleStart}
-          disabled={!selected || !apiKey.trim() || loading}
+          disabled={!selected || !apiKey.trim()}
           className={`w-full py-3.5 rounded-xl font-semibold text-sm transition-all duration-200 ${
-            selected && apiKey.trim() && !loading
+            selected && apiKey.trim()
               ? 'bg-corps-500 hover:bg-corps-600 text-zinc-950 shadow-lg shadow-corps-500/20'
               : 'bg-zinc-900 text-zinc-600 cursor-not-allowed border border-zinc-800'
           }`}
