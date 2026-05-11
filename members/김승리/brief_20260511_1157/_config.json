@@ -1,0 +1,20 @@
+{
+  "project": "나무십자가교회 위드 앱",
+  "type": "app",
+  "style": "warm_editorial",
+  "purpose": "나무십자가교회 성도들이 산발적인 정보를 헤매지 않고, 경건생활과 교회 일상에 필요한 모든 정보를 한 곳에서 편리하게 확인하고 소통할 수 있도록 돕는 것이 목적입니다.",
+  "supanova": {
+    "design_variance": 5,
+    "motion_intensity": 3,
+    "visual_density": 6
+  },
+  "mood_keywords": ["따뜻한", "즐거운", "깔끔한"],
+  "colors": {
+    "primary": "흰색",
+    "secondary": "검정색",
+    "accent": "코발트 블루, 노란색"
+  },
+  "avoid": ["올드하고 복잡한 느낌", "지나치게 알록달록한 느낌"],
+  "member": "김승리",
+  "created_at": "2023-11-21"
+}
