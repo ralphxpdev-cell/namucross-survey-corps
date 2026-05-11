@@ -1,0 +1,20 @@
+{
+  "project": "우드크로스 나눔터",
+  "type": "app",
+  "style": "warm_editorial",
+  "purpose": "나무십자가교회 성도들의 경건생활과 일상적인 교회 생활을 돕기 위한 전용 앱",
+  "supanova": {
+    "design_variance": 5,
+    "motion_intensity": 5,
+    "visual_density": 4
+  },
+  "mood_keywords": ["따뜻한", "신뢰감", "소통"],
+  "colors": {
+    "primary": "#EAE0D5",
+    "secondary": "#A9B4A0",
+    "accent": "#E2B095"
+  },
+  "avoid": ["너무 유치한 느낌", "지나치게 상업적인 느낌", "차가운 느낌"],
+  "member": "구광현",
+  "created_at": "2023-11-23"
+}
