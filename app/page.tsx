@@ -130,7 +130,7 @@ export default function OnboardingPage() {
               {savedMember}님 Pi 시작하기
             </button>
             <p className="text-center text-xs text-zinc-600">
-              sc-start.mjs 다운로드 후 터미널에서 <code className="text-zinc-500">node sc-start.mjs</code>
+              <code className="text-zinc-500">sc-start.bat</code> 다운로드 후 더블클릭
             </p>
             <button
               onClick={() => { setSavedMember(null); setSelected(null) }}
@@ -176,17 +176,17 @@ export default function OnboardingPage() {
               </div>
             </div>
 
-            {/* API 키 있음 → Pi 다운로드 */}
+            {/* API 키 있음 → Pi 런처 다운로드 */}
             {selected && !needsKey && !checking && (
               <div className="space-y-2">
                 <button
                   onClick={() => downloadLauncher(selected)}
                   className="w-full py-3.5 rounded-xl bg-corps-500 hover:bg-corps-600 text-zinc-950 font-semibold text-sm transition-all shadow-lg shadow-corps-500/20"
                 >
-                  Pi 시작하기 — sc-start.mjs 다운로드
+                  Pi 시작하기 — 런처 다운로드
                 </button>
                 <p className="text-center text-xs text-zinc-600">
-                  터미널에서 <code className="text-zinc-500">node sc-start.mjs</code> 실행
+                  <code className="text-zinc-500">sc-start.bat</code> 다운로드 후 더블클릭
                 </p>
               </div>
             )}
