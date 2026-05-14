@@ -298,7 +298,10 @@ export default function OnboardingPage() {
           </div>
         )}
 
-        <div className="text-center">
+        <div className="flex items-center justify-between">
+          <a href="/guide" className="text-xs text-zinc-700 hover:text-zinc-500 transition-colors">
+            사용 가이드 →
+          </a>
           <a href="/dashboard" className="text-xs text-zinc-700 hover:text-zinc-500 transition-colors">
             사령관 대시보드 →
           </a>
