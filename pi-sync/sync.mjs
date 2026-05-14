@@ -1,28 +1,53 @@
 /**
  * Survey Corps × Pi 연동 스크립트
  *
- * 사용법:
- *   node sync.mjs load [멤버이름]   세션 시작 전 — 최신 기획서 받아서 _context.md 생성
- *   node sync.mjs save [멤버이름]   세션 종료 후 — Pi 세션 로그 대시보드에 저장
+ * 처음 한 번만:
+ *   node sync.mjs setup [멤버이름]   내 이름 저장 (이후 자동 인식)
  *
- * 환경변수:
- *   SC_URL   웹앱 URL (기본값: https://brief-maker.vercel.app)
+ * 매 세션:
+ *   node sync.mjs load              시작 전 — 최신 기획서 받아서 _context.md 생성
+ *   node sync.mjs save              종료 후 — Pi 세션 대시보드에 저장
  */
 
 import fs from 'fs'
 import path from 'path'
 import os from 'os'
 
-const [,, cmd, member] = process.argv
-const SC_URL = (process.env.SC_URL || 'https://brief-maker.vercel.app').replace(/\/$/, '')
+const SC_URL    = 'https://brief-maker.vercel.app'
+const CONFIG_PATH = path.join(os.homedir(), '.sc-config.json')
 
-if (!cmd || !member) {
-  console.error('사용법: node sync.mjs [load|save] [멤버이름]')
-  process.exit(1)
+const [,, cmd, arg] = process.argv
+
+// ── 저장된 멤버 이름 읽기 ────────────────────────────────────────────────
+function loadConfig() {
+  if (!fs.existsSync(CONFIG_PATH)) return null
+  try { return JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf-8')) } catch { return null }
 }
 
-// ── load: 최신 기획서 → _context.md ──────────────────────────────────────
-if (cmd === 'load') {
+function getMember() {
+  const cfg = loadConfig()
+  if (!cfg?.member) {
+    console.error('❌ 멤버 설정이 없습니다. 먼저 실행하세요:')
+    console.error('   node sync.mjs setup [내 이름]')
+    process.exit(1)
+  }
+  return cfg.member
+}
+
+// ── setup: 이름 저장 ─────────────────────────────────────────────────────
+if (cmd === 'setup') {
+  if (!arg) {
+    console.error('사용법: node sync.mjs setup [이름]')
+    process.exit(1)
+  }
+  fs.writeFileSync(CONFIG_PATH, JSON.stringify({ member: arg }, null, 2), 'utf-8')
+  console.log(`✅ 설정 완료! 이제부터 ${arg}님으로 자동 인식됩니다.`)
+  console.log(`   저장 위치: ${CONFIG_PATH}`)
+}
+
+// ── load: 최신 기획서 → _context.md ─────────────────────────────────────
+else if (cmd === 'load') {
+  const member = getMember()
   console.log(`📡 ${member}님의 최신 기획서 불러오는 중...`)
 
   const res = await fetch(`${SC_URL}/api/sessions/${encodeURIComponent(member)}`)
@@ -32,13 +57,12 @@ if (cmd === 'load') {
   }
 
   const data = await res.json()
-
   if (!data.context) {
     console.log('ℹ️ 제출된 기획서 없음. Pi를 새로 시작합니다.')
     process.exit(0)
   }
 
-  const contextContent = [
+  const content = [
     '# Survey Corps 기획서 컨텍스트',
     `멤버: ${member} | 폴더: ${data.folder}`,
     '',
@@ -50,13 +74,14 @@ if (cmd === 'load') {
     data.context,
   ].join('\n')
 
-  fs.writeFileSync('_context.md', contextContent, 'utf-8')
-  console.log(`✅ 기획서 로드 완료 → _context.md (${data.folder})`)
+  fs.writeFileSync('_context.md', content, 'utf-8')
+  console.log(`✅ 기획서 로드 완료 (${data.folder})`)
   console.log('Pi 시작 후 "기획서 내용 확인해줘"라고 입력하세요.\n')
 }
 
-// ── save: Pi 세션 → 대시보드 저장 ────────────────────────────────────────
+// ── save: Pi 세션 → 대시보드 ─────────────────────────────────────────────
 else if (cmd === 'save') {
+  const member = getMember()
   const sessionsDir = path.join(os.homedir(), '.pi', 'agent', 'sessions')
 
   if (!fs.existsSync(sessionsDir)) {
@@ -65,12 +90,11 @@ else if (cmd === 'save') {
     process.exit(1)
   }
 
-  // 현재 디렉토리 기반으로 최신 세션 파일 탐색
   const allFiles = fs.readdirSync(sessionsDir)
     .filter(f => f.endsWith('.json'))
     .map(f => {
-      const fullPath = path.join(sessionsDir, f)
-      return { name: f, path: fullPath, mtime: fs.statSync(fullPath).mtimeMs }
+      const p = path.join(sessionsDir, f)
+      return { path: p, mtime: fs.statSync(p).mtimeMs }
     })
     .sort((a, b) => b.mtime - a.mtime)
 
@@ -79,28 +103,22 @@ else if (cmd === 'save') {
     process.exit(1)
   }
 
-  const sessionFile = allFiles[0]
-  const raw = JSON.parse(fs.readFileSync(sessionFile.path, 'utf-8'))
-
-  // Pi 세션 포맷에서 메시지 추출 (Pi 버전에 따라 구조가 다를 수 있음)
-  const messages = (
-    raw.messages ||
-    raw.turns ||
-    raw.history ||
-    []
-  ).map((m: any) => ({
-    role: m.role || (m.type === 'assistant' ? 'assistant' : 'user'),
-    content: typeof m.content === 'string'
-      ? m.content
-      : m.content?.map((c: any) => c.text || '').join('') || '',
-  })).filter((m: any) => m.content)
+  const raw = JSON.parse(fs.readFileSync(allFiles[0].path, 'utf-8'))
+  const messages = (raw.messages || raw.turns || raw.history || [])
+    .map((m) => ({
+      role: m.role || (m.type === 'assistant' ? 'assistant' : 'user'),
+      content: typeof m.content === 'string'
+        ? m.content
+        : (m.content || []).map((c) => c.text || '').join(''),
+    }))
+    .filter((m) => m.content)
 
   if (!messages.length) {
     console.log('ℹ️ 저장할 대화 내용이 없습니다.')
     process.exit(0)
   }
 
-  console.log(`📤 세션 저장 중... (${messages.length}개 메시지)`)
+  console.log(`📤 ${member}님의 세션 저장 중... (${messages.length}개 메시지)`)
 
   const res = await fetch(`${SC_URL}/api/sessions/${encodeURIComponent(member)}`, {
     method: 'POST',
@@ -110,8 +128,9 @@ else if (cmd === 'save') {
 
   if (res.ok) {
     const data = await res.json()
-    console.log(`✅ 저장 완료! → ${data.path}`)
-    console.log(`   대시보드에서 확인: ${SC_URL}/dashboard`)
+    console.log(`✅ 저장 완료!`)
+    console.log(`   대시보드: ${SC_URL}/dashboard`)
+    console.log(`   파일: ${data.path}`)
   } else {
     const err = await res.json().catch(() => ({}))
     console.error('❌ 저장 실패:', err.error || res.statusText)
@@ -120,6 +139,8 @@ else if (cmd === 'save') {
 }
 
 else {
-  console.error('명령어는 load 또는 save 만 가능합니다.')
-  process.exit(1)
+  console.log('사용법:')
+  console.log('  node sync.mjs setup [이름]   처음 한 번만 — 내 이름 저장')
+  console.log('  node sync.mjs load           세션 시작 전 — 기획서 로드')
+  console.log('  node sync.mjs save           세션 종료 후 — 세션 저장')
 }
