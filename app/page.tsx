@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
 const MEMBERS = ['이태섭', '안성은', '백은총', '김승리', '구광현', '전성은']
@@ -18,6 +18,14 @@ export default function OnboardingPage() {
   const [selected, setSelected] = useState<string | null>(null)
   const [apiKey, setApiKey] = useState('')
   const [error, setError] = useState('')
+  const [savedMember, setSavedMember] = useState<string | null>(null)
+  const [showForm, setShowForm] = useState(false)
+
+  useEffect(() => {
+    const m = localStorage.getItem('sc_member')
+    const k = localStorage.getItem('sc_api_key')
+    if (m && k) setSavedMember(m)
+  }, [])
 
   const handleStart = () => {
     if (!selected || !apiKey.trim()) return
@@ -45,6 +53,31 @@ export default function OnboardingPage() {
       </div>
 
       <div className="w-full max-w-sm space-y-8">
+
+        {/* 저장된 계정 — 바로 시작하기 */}
+        {savedMember && !showForm && (
+          <div className="space-y-3">
+            <button
+              onClick={() => router.push('/workspace')}
+              className="w-full py-4 rounded-xl bg-corps-500 hover:bg-corps-600 text-zinc-950 font-semibold text-sm transition-all shadow-lg shadow-corps-500/20 flex items-center justify-center gap-2"
+            >
+              <svg width="14" height="14" viewBox="0 0 28 28" fill="none">
+                <path d="M14 2L4 8v12l10 6 10-6V8L14 2z" stroke="currentColor" strokeWidth="2" fill="none"/>
+                <path d="M14 8v12M4 8l10 6 10-6" stroke="currentColor" strokeWidth="2"/>
+              </svg>
+              {savedMember}님으로 바로 시작하기
+            </button>
+            <button
+              onClick={() => { setShowForm(true); setSavedMember(null) }}
+              className="w-full py-2 text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
+            >
+              다른 멤버로 로그인 →
+            </button>
+          </div>
+        )}
+
+        {/* 기본 폼 — 처음이거나 다른 멤버로 전환 시 */}
+        {(!savedMember || showForm) && (<>
         {/* STEP 1: 멤버 선택 */}
         <div>
           <p className="text-xs text-zinc-600 tracking-widest uppercase mb-4">01 — 멤버 선택</p>
@@ -120,6 +153,8 @@ export default function OnboardingPage() {
             사령관 대시보드 →
           </a>
         </div>
+        </>)}
+
       </div>
     </div>
   )
