@@ -50,6 +50,10 @@ export default function OnboardingPage() {
   const [checking, setChecking]   = useState(false)
   const [needsKey, setNeedsKey]   = useState(false)
 
+  const downloadLauncher = (name: string) => {
+    window.location.href = `/api/launcher/${encodeURIComponent(name)}`
+  }
+
   // 저장된 멤버 → Supabase에서 키 자동 조회
   useEffect(() => {
     const m = localStorage.getItem('sc_member')
@@ -75,7 +79,7 @@ export default function OnboardingPage() {
     if (key) {
       localStorage.setItem('sc_member', name)
       localStorage.setItem('sc_api_key', key)
-      router.push('/workspace')
+      setNeedsKey(false)
     } else {
       setNeedsKey(true)
     }
@@ -93,7 +97,7 @@ export default function OnboardingPage() {
     setChecking(false)
     localStorage.setItem('sc_member', selected)
     localStorage.setItem('sc_api_key', apiKey.trim())
-    router.push('/workspace')
+    downloadLauncher(selected)
   }
 
   return (
@@ -112,24 +116,27 @@ export default function OnboardingPage() {
 
       <div className="w-full max-w-sm space-y-8">
 
-        {/* 저장된 계정 — 바로 시작 */}
+        {/* 저장된 계정 — Pi 런처 다운로드 */}
         {savedMember && !checking && (
           <div className="space-y-3">
             <button
-              onClick={() => router.push('/workspace')}
+              onClick={() => downloadLauncher(savedMember)}
               className="w-full py-4 rounded-xl bg-corps-500 hover:bg-corps-600 text-zinc-950 font-semibold text-sm transition-all shadow-lg shadow-corps-500/20 flex items-center justify-center gap-2"
             >
               <svg width="14" height="14" viewBox="0 0 28 28" fill="none">
                 <path d="M14 2L4 8v12l10 6 10-6V8L14 2z" stroke="currentColor" strokeWidth="2" fill="none"/>
                 <path d="M14 8v12M4 8l10 6 10-6" stroke="currentColor" strokeWidth="2"/>
               </svg>
-              {savedMember}님으로 바로 시작하기
+              {savedMember}님 Pi 시작하기
             </button>
+            <p className="text-center text-xs text-zinc-600">
+              sc-start.mjs 다운로드 후 터미널에서 <code className="text-zinc-500">node sc-start.mjs</code>
+            </p>
             <button
               onClick={() => { setSavedMember(null); setSelected(null) }}
               className="w-full py-2 text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
             >
-              다른 멤버로 로그인 →
+              다른 멤버로 →
             </button>
           </div>
         )}
@@ -168,6 +175,21 @@ export default function OnboardingPage() {
                 ))}
               </div>
             </div>
+
+            {/* API 키 있음 → Pi 다운로드 */}
+            {selected && !needsKey && !checking && (
+              <div className="space-y-2">
+                <button
+                  onClick={() => downloadLauncher(selected)}
+                  className="w-full py-3.5 rounded-xl bg-corps-500 hover:bg-corps-600 text-zinc-950 font-semibold text-sm transition-all shadow-lg shadow-corps-500/20"
+                >
+                  Pi 시작하기 — sc-start.mjs 다운로드
+                </button>
+                <p className="text-center text-xs text-zinc-600">
+                  터미널에서 <code className="text-zinc-500">node sc-start.mjs</code> 실행
+                </p>
+              </div>
+            )}
 
             {/* API 키 입력 — Supabase에 없을 때만 */}
             {needsKey && selected && (
