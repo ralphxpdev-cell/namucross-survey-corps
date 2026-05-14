@@ -211,7 +211,7 @@ export default function OnboardingPage() {
                 <div>
                   <p className="text-xs text-zinc-600 mb-1.5">② 매번 터미널에서</p>
                   <code className="block text-base text-corps-400 bg-zinc-950 px-3 py-2 rounded-lg font-bold tracking-wide">
-                    sc
+                    scpi
                   </code>
                 </div>
               </div>
