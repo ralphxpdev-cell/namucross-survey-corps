@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 
 const MEMBERS = ['이태섭', '안성은', '백은총', '김승리', '구광현', '전성은']
 
@@ -17,18 +16,40 @@ const COLORS = [
 const SB_URL = 'https://qitxwciaphfftuisyjrg.supabase.co'
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFpdHh3Y2lhcGhmZnR1aXN5anJnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1NjMwMTcsImV4cCI6MjA4OTEzOTAxN30.dkgdVwG_8W1CzKQhFe5REr-5n27sBzsMvxDxwzeCni0'
 
-async function fetchKey(name: string): Promise<string | null> {
+const KEY_FIELDS = [
+  { id: 'gemini',    label: 'Gemini 2.5 Flash',   placeholder: 'AIzaSy...',  prefix: 'AIza',    hintUrl: 'https://aistudio.google.com/app/apikey',         hint: 'Google AI Studio (무료)' },
+  { id: 'anthropic', label: 'Claude (Anthropic)',  placeholder: 'sk-ant-...', prefix: 'sk-ant-', hintUrl: 'https://console.anthropic.com/settings/keys',    hint: 'Anthropic Console' },
+  { id: 'openai',   label: 'GPT-4o (OpenAI)',     placeholder: 'sk-...',     prefix: 'sk-',     hintUrl: 'https://platform.openai.com/api-keys',           hint: 'OpenAI Platform' },
+  { id: 'groq',     label: 'LLaMA 3.3 (Groq)',    placeholder: 'gsk_...',    prefix: 'gsk_',    hintUrl: 'https://console.groq.com/keys',                  hint: 'Groq Console (무료)' },
+]
+
+type MemberRow = { api_key: string | null; keys: Record<string, string> | null }
+
+async function fetchMemberRow(name: string): Promise<MemberRow | null> {
   try {
     const res = await fetch(
-      `${SB_URL}/rest/v1/sc_members?name=eq.${encodeURIComponent(name)}&select=api_key`,
+      `${SB_URL}/rest/v1/sc_members?name=eq.${encodeURIComponent(name)}&select=api_key,keys`,
       { headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` } }
     )
     const data = await res.json()
-    return data[0]?.api_key ?? null
+    return data[0] ?? null
   } catch { return null }
 }
 
-async function saveKey(name: string, apiKey: string) {
+function hasAnyKey(row: MemberRow | null): boolean {
+  if (!row) return false
+  if (row.api_key) return true
+  const k = row.keys || {}
+  return !!(k.anthropic_key || k.openai_key || k.groq_key)
+}
+
+async function saveKeys(name: string, apiKey: string | null, keysPatch: Record<string, string>) {
+  const existing = await fetchMemberRow(name)
+  const mergedKeys = { ...(existing?.keys || {}), ...keysPatch }
+
+  const body: Record<string, unknown> = { name, keys: mergedKeys, updated_at: new Date().toISOString() }
+  if (apiKey) body.api_key = apiKey
+
   await fetch(`${SB_URL}/rest/v1/sc_members`, {
     method: 'POST',
     headers: {
@@ -37,20 +58,20 @@ async function saveKey(name: string, apiKey: string) {
       'Content-Type': 'application/json',
       Prefer: 'resolution=merge-duplicates',
     },
-    body: JSON.stringify({ name, api_key: apiKey, updated_at: new Date().toISOString() }),
+    body: JSON.stringify(body),
   })
 }
 
 export default function OnboardingPage() {
-  const router = useRouter()
-  const [selected, setSelected]   = useState<string | null>(null)
-  const [apiKey, setApiKey]       = useState('')
-  const [error, setError]         = useState('')
+  const [selected, setSelected]     = useState<string | null>(null)
   const [savedMember, setSavedMember] = useState<string | null>(null)
-  const [checking, setChecking]   = useState(false)
-  const [needsKey, setNeedsKey]   = useState(false)
+  const [checking, setChecking]     = useState(false)
+  const [needsKey, setNeedsKey]     = useState(false)
+  const [saving, setSaving]         = useState(false)
+  const [error, setError]           = useState('')
+  const [copied, setCopied]         = useState(false)
 
-  const [copied, setCopied] = useState(false)
+  const [keys, setKeys] = useState({ gemini: '', anthropic: '', openai: '', groq: '' })
 
   const copyInstall = () => {
     navigator.clipboard.writeText('npm install -g github:ralphxpdev-cell/sc-launcher')
@@ -58,50 +79,54 @@ export default function OnboardingPage() {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  // 저장된 멤버 → Supabase에서 키 자동 조회
   useEffect(() => {
     const m = localStorage.getItem('sc_member')
     if (!m) return
     setChecking(true)
-    fetchKey(m).then(key => {
-      if (key) {
-        localStorage.setItem('sc_api_key', key)
-        setSavedMember(m)
-      }
+    fetchMemberRow(m).then(row => {
+      if (hasAnyKey(row)) setSavedMember(m)
       setChecking(false)
     })
   }, [])
 
-  // 멤버 카드 클릭 → Supabase 조회
   const handleSelect = async (name: string) => {
     setSelected(name)
     setNeedsKey(false)
     setError('')
+    setKeys({ gemini: '', anthropic: '', openai: '', groq: '' })
     setChecking(true)
-    const key = await fetchKey(name)
+    const row = await fetchMemberRow(name)
     setChecking(false)
-    if (key) {
+    if (hasAnyKey(row)) {
       localStorage.setItem('sc_member', name)
-      localStorage.setItem('sc_api_key', key)
-      setNeedsKey(false)
+      setSavedMember(name)
     } else {
       setNeedsKey(true)
     }
   }
 
-  // API 키 최초 입력 → Supabase 저장
-  const handleStart = async () => {
-    if (!selected || !apiKey.trim()) return
-    if (!apiKey.trim().startsWith('AIza') || apiKey.trim().length < 30) {
-      setError('Gemini API 키 형식이 올바르지 않습니다. (AIza로 시작)')
-      return
-    }
-    setChecking(true)
-    await saveKey(selected, apiKey.trim())
-    setChecking(false)
-    localStorage.setItem('sc_member', selected)
-    localStorage.setItem('sc_api_key', apiKey.trim())
-    setSavedMember(selected)
+  const handleSave = async () => {
+    const g = keys.gemini.trim()
+    const a = keys.anthropic.trim()
+    const o = keys.openai.trim()
+    const gr = keys.groq.trim()
+
+    if (!g && !a && !o && !gr) { setError('최소 하나의 API 키를 입력하세요'); return }
+    if (g && (!g.startsWith('AIza') || g.length < 30)) { setError('Gemini 키 형식이 올바르지 않습니다 (AIza...)'); return }
+    if (a && !a.startsWith('sk-ant-')) { setError('Anthropic 키 형식이 올바르지 않습니다 (sk-ant-...)'); return }
+    if (o && !o.startsWith('sk-')) { setError('OpenAI 키 형식이 올바르지 않습니다 (sk-...)'); return }
+    if (gr && !gr.startsWith('gsk_')) { setError('Groq 키 형식이 올바르지 않습니다 (gsk_...)'); return }
+
+    const keysPatch: Record<string, string> = {}
+    if (a) keysPatch.anthropic_key = a
+    if (o) keysPatch.openai_key = o
+    if (gr) keysPatch.groq_key = gr
+
+    setSaving(true)
+    await saveKeys(selected!, g || null, keysPatch)
+    setSaving(false)
+    localStorage.setItem('sc_member', selected!)
+    setSavedMember(selected!)
   }
 
   return (
@@ -142,7 +167,7 @@ export default function OnboardingPage() {
               <div>
                 <p className="text-xs text-zinc-600 mb-1.5">② 매번 터미널에서</p>
                 <code className="block text-base text-corps-400 bg-zinc-950 px-3 py-2 rounded-lg font-bold tracking-wide">
-                  sc
+                  scpi
                 </code>
               </div>
             </div>
@@ -190,7 +215,7 @@ export default function OnboardingPage() {
               </div>
             </div>
 
-            {/* API 키 있음 → sc 명령어 안내 */}
+            {/* API 키 있음 → scpi 명령어 안내 */}
             {selected && !needsKey && !checking && (
               <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-4 space-y-3">
                 <p className="text-xs text-zinc-500 uppercase tracking-widest">{selected}님 Pi 시작하기</p>
@@ -217,42 +242,51 @@ export default function OnboardingPage() {
               </div>
             )}
 
-            {/* API 키 입력 — Supabase에 없을 때만 */}
+            {/* API 키 없음 → 멀티 프로바이더 등록 */}
             {needsKey && selected && (
-              <div>
-                <p className="text-xs text-zinc-600 tracking-widest uppercase mb-4">
-                  Gemini API 키 <span className="text-zinc-700 normal-case">(처음 한 번만)</span>
-                </p>
-                <div className="space-y-2">
-                  <input
-                    type="password"
-                    placeholder="AIzaSy..."
-                    value={apiKey}
-                    onChange={e => { setApiKey(e.target.value); setError('') }}
-                    onKeyDown={e => e.key === 'Enter' && handleStart()}
-                    autoFocus
-                    className="w-full px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-200 text-sm font-mono placeholder-zinc-700 outline-none focus:border-zinc-600 transition-colors"
-                  />
-                  <a
-                    href="https://aistudio.google.com/app/apikey"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[11px] text-zinc-600 hover:text-corps-400 transition-colors"
-                  >
-                    Google AI Studio에서 무료 발급 →
-                  </a>
+              <div className="space-y-4">
+                <div>
+                  <p className="text-xs text-zinc-600 tracking-widest uppercase mb-1">API 키 등록</p>
+                  <p className="text-xs text-zinc-700">하나 이상 입력하면 됩니다. 없는 건 비워두세요.</p>
                 </div>
-                {error && <p className="text-xs text-red-400 mt-2">{error}</p>}
+
+                <div className="space-y-3">
+                  {KEY_FIELDS.map(f => (
+                    <div key={f.id}>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="text-xs text-zinc-500">{f.label}</label>
+                        <a
+                          href={f.hintUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[10px] text-zinc-700 hover:text-corps-400 transition-colors"
+                        >
+                          {f.hint} →
+                        </a>
+                      </div>
+                      <input
+                        type="password"
+                        placeholder={f.placeholder}
+                        value={keys[f.id as keyof typeof keys]}
+                        onChange={e => { setKeys(prev => ({ ...prev, [f.id]: e.target.value })); setError('') }}
+                        className="w-full px-3 py-2.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-200 text-sm font-mono placeholder-zinc-700 outline-none focus:border-zinc-600 transition-colors"
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                {error && <p className="text-xs text-red-400">{error}</p>}
+
                 <button
-                  onClick={handleStart}
-                  disabled={!apiKey.trim()}
-                  className={`mt-4 w-full py-3.5 rounded-xl font-semibold text-sm transition-all duration-200 ${
-                    apiKey.trim()
+                  onClick={handleSave}
+                  disabled={saving || (!keys.gemini.trim() && !keys.anthropic.trim() && !keys.openai.trim() && !keys.groq.trim())}
+                  className={`w-full py-3.5 rounded-xl font-semibold text-sm transition-all duration-200 ${
+                    !saving && (keys.gemini.trim() || keys.anthropic.trim() || keys.openai.trim() || keys.groq.trim())
                       ? 'bg-corps-500 hover:bg-corps-600 text-zinc-950 shadow-lg shadow-corps-500/20'
                       : 'bg-zinc-900 text-zinc-600 cursor-not-allowed border border-zinc-800'
                   }`}
                 >
-                  저장하고 시작하기
+                  {saving ? '저장 중...' : '저장하고 시작하기'}
                 </button>
               </div>
             )}
