@@ -61,14 +61,15 @@ async function saveKeys(name: string, apiKey: string | null, keysPatch: Record<s
 }
 
 export default function OnboardingPage() {
-  const [selected, setSelected] = useState<string | null>(null)
-  const [hasKey, setHasKey]     = useState(false)
-  const [checking, setChecking] = useState(false)
-  const [needsKey, setNeedsKey] = useState(false)
-  const [saving, setSaving]     = useState(false)
-  const [error, setError]       = useState('')
-  const [copied, setCopied]     = useState(false)
-  const [keys, setKeys]         = useState({ gemini: '', anthropic: '', openai: '', groq: '' })
+  const [selected, setSelected]   = useState<string | null>(null)
+  const [hasKey, setHasKey]       = useState(false)
+  const [checking, setChecking]   = useState(false)
+  const [needsKey, setNeedsKey]   = useState(false)
+  const [showAdd, setShowAdd]     = useState(false)
+  const [saving, setSaving]       = useState(false)
+  const [error, setError]         = useState('')
+  const [copied, setCopied]       = useState(false)
+  const [keys, setKeys]           = useState({ gemini: '', anthropic: '', openai: '', groq: '' })
 
   const copyInstall = () => {
     navigator.clipboard.writeText('npm install -g github:ralphxpdev-cell/sc-launcher')
@@ -87,6 +88,7 @@ export default function OnboardingPage() {
     setSelected(name)
     setHasKey(false)
     setNeedsKey(false)
+    setShowAdd(false)
     setError('')
     setKeys({ gemini: '', anthropic: '', openai: '', groq: '' })
     setChecking(true)
@@ -179,30 +181,76 @@ export default function OnboardingPage() {
               <div className="bg-zinc-900 px-4 py-6 text-center text-zinc-600 text-sm">확인 중...</div>
             )}
 
-            {/* 키 있음 → scpi 안내 */}
+            {/* 키 있음 → scpi 안내 + 키 추가 */}
             {!checking && hasKey && (
-              <div className="bg-zinc-900 p-4 space-y-3">
-                <p className="text-xs text-zinc-500 uppercase tracking-widest">{selected}님 Pi 시작하기</p>
-                <div>
-                  <p className="text-xs text-zinc-600 mb-1.5">① 처음 한 번만 설치</p>
-                  <div className="flex items-center gap-2">
-                    <code className="flex-1 text-[11px] text-zinc-300 bg-zinc-950 px-3 py-2 rounded-lg truncate">
-                      npm install -g github:ralphxpdev-cell/sc-launcher
+              <div className="bg-zinc-900 divide-y divide-zinc-800">
+                <div className="p-4 space-y-3">
+                  <p className="text-xs text-zinc-500 uppercase tracking-widest">{selected}님 Pi 시작하기</p>
+                  <div>
+                    <p className="text-xs text-zinc-600 mb-1.5">① 처음 한 번만 설치</p>
+                    <div className="flex items-center gap-2">
+                      <code className="flex-1 text-[11px] text-zinc-300 bg-zinc-950 px-3 py-2 rounded-lg truncate">
+                        npm install -g github:ralphxpdev-cell/sc-launcher
+                      </code>
+                      <button
+                        onClick={copyInstall}
+                        className="shrink-0 px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs text-zinc-400 transition-colors"
+                      >
+                        {copied ? '✓' : '복사'}
+                      </button>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs text-zinc-600 mb-1.5">② 매번 터미널에서</p>
+                    <code className="block text-base text-corps-400 bg-zinc-950 px-3 py-2 rounded-lg font-bold tracking-wide">
+                      scpi
                     </code>
-                    <button
-                      onClick={copyInstall}
-                      className="shrink-0 px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs text-zinc-400 transition-colors"
-                    >
-                      {copied ? '✓' : '복사'}
-                    </button>
                   </div>
                 </div>
-                <div>
-                  <p className="text-xs text-zinc-600 mb-1.5">② 매번 터미널에서</p>
-                  <code className="block text-base text-corps-400 bg-zinc-950 px-3 py-2 rounded-lg font-bold tracking-wide">
-                    scpi
-                  </code>
-                </div>
+
+                {/* 키 추가 토글 */}
+                <button
+                  onClick={() => setShowAdd(v => !v)}
+                  className="w-full px-4 py-2.5 text-xs text-zinc-600 hover:text-zinc-400 transition-colors text-left flex items-center justify-between"
+                >
+                  <span>API 키 추가/수정</span>
+                  <span>{showAdd ? '▲' : '▼'}</span>
+                </button>
+
+                {showAdd && (
+                  <div className="p-4 space-y-3">
+                    {KEY_FIELDS.map(f => (
+                      <div key={f.id}>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="text-xs text-zinc-500">{f.label}</label>
+                          <a href={f.hintUrl} target="_blank" rel="noopener noreferrer"
+                            className="text-[10px] text-zinc-700 hover:text-corps-400 transition-colors">
+                            {f.hint} →
+                          </a>
+                        </div>
+                        <input
+                          type="password"
+                          placeholder={f.placeholder}
+                          value={keys[f.id as keyof typeof keys]}
+                          onChange={e => { setKeys(prev => ({ ...prev, [f.id]: e.target.value })); setError('') }}
+                          className="w-full px-3 py-2.5 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-200 text-sm font-mono placeholder-zinc-700 outline-none focus:border-zinc-600 transition-colors"
+                        />
+                      </div>
+                    ))}
+                    {error && <p className="text-xs text-red-400">{error}</p>}
+                    <button
+                      onClick={handleSave}
+                      disabled={saving || (!keys.gemini.trim() && !keys.anthropic.trim() && !keys.openai.trim() && !keys.groq.trim())}
+                      className={`w-full py-3 rounded-xl font-semibold text-sm transition-all duration-200 ${
+                        !saving && (keys.gemini.trim() || keys.anthropic.trim() || keys.openai.trim() || keys.groq.trim())
+                          ? 'bg-corps-500 hover:bg-corps-600 text-zinc-950'
+                          : 'bg-zinc-950 text-zinc-600 cursor-not-allowed border border-zinc-800'
+                      }`}
+                    >
+                      {saving ? '저장 중...' : '저장'}
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 
