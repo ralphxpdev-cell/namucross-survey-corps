@@ -50,8 +50,12 @@ export default function OnboardingPage() {
   const [checking, setChecking]   = useState(false)
   const [needsKey, setNeedsKey]   = useState(false)
 
-  const downloadLauncher = (name: string) => {
-    window.location.href = `/api/launcher/${encodeURIComponent(name)}`
+  const [copied, setCopied] = useState(false)
+
+  const copyInstall = () => {
+    navigator.clipboard.writeText('npm install -g github:ralphxpdev-cell/sc-launcher')
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   // 저장된 멤버 → Supabase에서 키 자동 조회
@@ -97,7 +101,7 @@ export default function OnboardingPage() {
     setChecking(false)
     localStorage.setItem('sc_member', selected)
     localStorage.setItem('sc_api_key', apiKey.trim())
-    downloadLauncher(selected)
+    setSavedMember(selected)
   }
 
   return (
@@ -116,22 +120,32 @@ export default function OnboardingPage() {
 
       <div className="w-full max-w-sm space-y-8">
 
-        {/* 저장된 계정 — Pi 런처 다운로드 */}
+        {/* 저장된 계정 */}
         {savedMember && !checking && (
-          <div className="space-y-3">
-            <button
-              onClick={() => downloadLauncher(savedMember)}
-              className="w-full py-4 rounded-xl bg-corps-500 hover:bg-corps-600 text-zinc-950 font-semibold text-sm transition-all shadow-lg shadow-corps-500/20 flex items-center justify-center gap-2"
-            >
-              <svg width="14" height="14" viewBox="0 0 28 28" fill="none">
-                <path d="M14 2L4 8v12l10 6 10-6V8L14 2z" stroke="currentColor" strokeWidth="2" fill="none"/>
-                <path d="M14 8v12M4 8l10 6 10-6" stroke="currentColor" strokeWidth="2"/>
-              </svg>
-              {savedMember}님 Pi 시작하기
-            </button>
-            <p className="text-center text-xs text-zinc-600">
-              <code className="text-zinc-500">sc-start.bat</code> 다운로드 후 더블클릭
-            </p>
+          <div className="space-y-4">
+            <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-4 space-y-3">
+              <p className="text-xs text-zinc-500 uppercase tracking-widest">{savedMember}님 Pi 시작하기</p>
+              <div>
+                <p className="text-xs text-zinc-600 mb-1.5">① 처음 한 번만 설치</p>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 text-[11px] text-zinc-300 bg-zinc-950 px-3 py-2 rounded-lg truncate">
+                    npm install -g github:ralphxpdev-cell/sc-launcher
+                  </code>
+                  <button
+                    onClick={copyInstall}
+                    className="shrink-0 px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs text-zinc-400 transition-colors"
+                  >
+                    {copied ? '✓' : '복사'}
+                  </button>
+                </div>
+              </div>
+              <div>
+                <p className="text-xs text-zinc-600 mb-1.5">② 매번 터미널에서</p>
+                <code className="block text-base text-corps-400 bg-zinc-950 px-3 py-2 rounded-lg font-bold tracking-wide">
+                  sc
+                </code>
+              </div>
+            </div>
             <button
               onClick={() => { setSavedMember(null); setSelected(null) }}
               className="w-full py-2 text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
@@ -176,18 +190,30 @@ export default function OnboardingPage() {
               </div>
             </div>
 
-            {/* API 키 있음 → Pi 런처 다운로드 */}
+            {/* API 키 있음 → sc 명령어 안내 */}
             {selected && !needsKey && !checking && (
-              <div className="space-y-2">
-                <button
-                  onClick={() => downloadLauncher(selected)}
-                  className="w-full py-3.5 rounded-xl bg-corps-500 hover:bg-corps-600 text-zinc-950 font-semibold text-sm transition-all shadow-lg shadow-corps-500/20"
-                >
-                  Pi 시작하기 — 런처 다운로드
-                </button>
-                <p className="text-center text-xs text-zinc-600">
-                  <code className="text-zinc-500">sc-start.bat</code> 다운로드 후 더블클릭
-                </p>
+              <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-4 space-y-3">
+                <p className="text-xs text-zinc-500 uppercase tracking-widest">{selected}님 Pi 시작하기</p>
+                <div>
+                  <p className="text-xs text-zinc-600 mb-1.5">① 처음 한 번만 설치</p>
+                  <div className="flex items-center gap-2">
+                    <code className="flex-1 text-[11px] text-zinc-300 bg-zinc-950 px-3 py-2 rounded-lg truncate">
+                      npm install -g github:ralphxpdev-cell/sc-launcher
+                    </code>
+                    <button
+                      onClick={copyInstall}
+                      className="shrink-0 px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs text-zinc-400 transition-colors"
+                    >
+                      {copied ? '✓' : '복사'}
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs text-zinc-600 mb-1.5">② 매번 터미널에서</p>
+                  <code className="block text-base text-corps-400 bg-zinc-950 px-3 py-2 rounded-lg font-bold tracking-wide">
+                    sc
+                  </code>
+                </div>
               </div>
             )}
 
