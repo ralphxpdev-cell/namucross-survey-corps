@@ -48,7 +48,7 @@ async function saveKeys(name: string, apiKey: string | null, keysPatch: Record<s
   const mergedKeys = { ...(existing?.keys || {}), ...keysPatch }
   const body: Record<string, unknown> = { name, keys: mergedKeys, updated_at: new Date().toISOString() }
   if (apiKey) body.api_key = apiKey
-  await fetch(`${SB_URL}/rest/v1/sc_members`, {
+  const res = await fetch(`${SB_URL}/rest/v1/sc_members`, {
     method: 'POST',
     headers: {
       apikey: SB_KEY,
@@ -58,6 +58,10 @@ async function saveKeys(name: string, apiKey: string | null, keysPatch: Record<s
     },
     body: JSON.stringify(body),
   })
+  if (!res.ok) {
+    const detail = await res.text().catch(() => res.statusText)
+    throw new Error(`저장 실패 (${res.status}): ${detail}`)
+  }
 }
 
 export default function OnboardingPage() {
@@ -117,11 +121,16 @@ export default function OnboardingPage() {
     if (o) keysPatch.openai_key = o
     if (gr) keysPatch.groq_key = gr
     setSaving(true)
-    await saveKeys(selected!, g || null, keysPatch)
-    setSaving(false)
-    localStorage.setItem('sc_member', selected!)
-    setNeedsKey(false)
-    setHasKey(true)
+    try {
+      await saveKeys(selected!, g || null, keysPatch)
+      localStorage.setItem('sc_member', selected!)
+      setNeedsKey(false)
+      setHasKey(true)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '저장 중 오류가 발생했습니다')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const colorIdx = selected ? MEMBERS.indexOf(selected) : -1
