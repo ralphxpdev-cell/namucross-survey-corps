@@ -225,7 +225,18 @@ export default function OnboardingPage() {
 
                 {/* 키 추가 토글 */}
                 <button
-                  onClick={() => setShowAdd(v => !v)}
+                  onClick={async () => {
+                    if (!showAdd) {
+                      const row = await fetchMemberRow(selected!)
+                      setKeys({
+                        gemini:    row?.api_key || '',
+                        anthropic: row?.keys?.anthropic_key || '',
+                        openai:    row?.keys?.openai_key || '',
+                        groq:      row?.keys?.groq_key || '',
+                      })
+                    }
+                    setShowAdd(v => !v)
+                  }}
                   className="w-full px-4 py-2.5 text-xs text-zinc-600 hover:text-zinc-400 transition-colors text-left flex items-center justify-between"
                 >
                   <span>API 키 추가/수정</span>
