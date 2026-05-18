@@ -48,6 +48,7 @@ async function saveKeys(name: string, apiKey: string | null, keysPatch: Record<s
   const mergedKeys = { ...(existing?.keys || {}), ...keysPatch }
   const body: Record<string, unknown> = { name, keys: mergedKeys, updated_at: new Date().toISOString() }
   if (apiKey) body.api_key = apiKey
+  else body.api_key = existing?.api_key ?? ''
   const res = await fetch(`${SB_URL}/rest/v1/sc_members`, {
     method: 'POST',
     headers: {
