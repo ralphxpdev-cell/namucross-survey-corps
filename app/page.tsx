@@ -74,6 +74,7 @@ export default function OnboardingPage() {
   const [saving, setSaving]       = useState(false)
   const [error, setError]         = useState('')
   const [copied, setCopied]       = useState(false)
+  const [saved, setSaved]         = useState(false)
   const [keys, setKeys]           = useState({ gemini: '', anthropic: '', openai: '', groq: '' })
 
   const copyInstall = () => {
@@ -127,6 +128,10 @@ export default function OnboardingPage() {
       localStorage.setItem('sc_member', selected!)
       setNeedsKey(false)
       setHasKey(true)
+      setShowAdd(false)
+      setKeys({ gemini: '', anthropic: '', openai: '', groq: '' })
+      setSaved(true)
+      setTimeout(() => setSaved(false), 3000)
     } catch (e) {
       setError(e instanceof Error ? e.message : '저장 중 오류가 발생했습니다')
     } finally {
@@ -305,6 +310,12 @@ export default function OnboardingPage() {
                 </button>
               </div>
             )}
+          </div>
+        )}
+
+        {saved && (
+          <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-400 text-center">
+            ✓ 저장됐어요
           </div>
         )}
 
